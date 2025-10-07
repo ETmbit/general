@@ -61,10 +61,12 @@ enum Pace {
 }
 
 input.onButtonPressed(Button.A, function () {
+    WAITABORT = false
     if (runHandler) runHandler()
 })
 
 input.onButtonPressed(Button.B, function () {
+    WAITABORT = true
     if (stopHandler) stopHandler()
 })
 
@@ -412,10 +414,7 @@ namespace General {
     //% block.loc.nl="wacht totdat %state"
     export function waitUntil(state: boolean) {
         while (!state) {
-			if (WAITABORT) {
-				WAITABORT = false
-				return
-			}
+			if (WAITABORT) return
 			basic.pause(1)
 		}
     }
@@ -425,10 +424,7 @@ namespace General {
     export function wait(sec: number) {
 		let tm = control.millis() + sec * 1000
         while (control.millis() < tm) {
-			if (WAITABORT) {
-				WAITABORT = false
-				return
-			}
+			if (WAITABORT) return
 			basic.pause(1)
 		}
     }
