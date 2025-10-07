@@ -37,6 +37,8 @@ let stopHandler: handler     // call to stop all activity of a model
 const LOW = 0
 const HIGH = 1
 
+let WAITABORT = false
+
 enum State {
     //% block="off"
     //% block.loc.nl="uit"
@@ -406,9 +408,28 @@ namespace General {
         return clr
     }
 
+    //% block="wait until %state"
+    //% block.loc.nl="wacht totdat %state"
+    export function waitUntil(state: boolean) {
+        while (!state) {
+			if (WAITABORT) {
+				WAITABORT = false
+				return
+			}
+			basic.pause(1)
+		}
+    }
+
     //% block="wait %sec seconds"
     //% block.loc.nl="wacht %sec seconden"
     export function wait(sec: number) {
-        basic.pause(sec * 1000)
+		let tm = control.millis() + sec * 1000
+        while (control.millis() < tm) {
+			if (WAITABORT) {
+				WAITABORT = false
+				return
+			}
+			basic.pause(1)
+		}
     }
 }
