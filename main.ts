@@ -452,7 +452,7 @@ namespace General {
     //% subcategory="Radio"
     //% block="send message %text with id %id"
     //% block.loc.nl="stuur het bericht %text met id %id"
-    function sendRadioMessage(msg: string, id: number) {
+    export function sendRadioMessage(msg: string, id: number) {
         // messages end with a '~'
         // messages are sent in chunks
         // mbit radio buffer size is only 19 bytes
