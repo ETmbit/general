@@ -27,10 +27,10 @@ of handlers.
 
 IMPORTANT NOTE:
 Projects based on this 'general' extension MAY NOT implement the
-next standard handlers. They are implemented in this extension.
+next standard handlers. They are implemented in this extension and will be
+overruled when used in a main program.
 - 'input.onLogoEvent' - sets the radio group by pressing the logo repeatedly.
 - 'input.onButtonPressed' - will call registered 'ETstartHandlers' or 'ETstopHandlers'.
-- 'input.onGesture' - will call registered 'ET<gesture>Handlers'.
 - 'radio.onReceivedString' - will call registered 'ETradioHandlers'.
 */
 
@@ -66,59 +66,6 @@ enum Pace {
     //% block.loc.nl="langzame"
     Slow,
 }
-
-
-//##### GESTURE HANDLING #####//
-
-
-let ETscreenUpHandlers: handler[] = []
-let ETscreenDownHandlers: handler[] = []
-let ETlogoUpHandlers: handler[] = []
-let ETlogoDownHandlers: handler[] = []
-let ETtiltLeftHandlers: handler[] = []
-let ETtiltRightHandlers: handler[] = []
-let ETscreenUpHandler: handler
-let ETscreenDownHandler: handler
-let ETlogoUpHandler: handler
-let ETlogoDownHandler: handler
-let ETtiltLeftHandler: handler
-let ETtiltRightHandler: handler
-
-input.onGesture(Gesture.ScreenUp, function () {
-    for (let ix = 0; ix < ETscreenUpHandlers.length; ix++)
-        ETscreenUpHandlers[ix]()
-    if (ETscreenUpHandler) ETscreenUpHandler()
-})
-
-input.onGesture(Gesture.ScreenDown, function () {
-    for (let ix = 0; ix < ETscreenDownHandlers.length; ix++)
-        ETscreenDownHandlers[ix]()
-    if (ETscreenDownHandler) ETscreenDownHandler()
-})
-
-input.onGesture(Gesture.LogoUp, function () {
-    for (let ix = 0; ix < ETlogoUpHandlers.length; ix++)
-        ETlogoUpHandlers[ix]()
-    if (ETlogoUpHandler) ETlogoUpHandler()
-})
-
-input.onGesture(Gesture.LogoDown, function () {
-    for (let ix = 0; ix < ETlogoDownHandlers.length; ix++)
-        ETlogoDownHandlers[ix]()
-    if (ETlogoDownHandler) ETlogoDownHandler()
-})
-
-input.onGesture(Gesture.TiltRight, function () {
-    for (let ix = 0; ix < ETtiltRightHandlers.length; ix++)
-        ETtiltRightHandlers[ix]()
-    if (ETtiltRightHandler) ETtiltRightHandler()
-})
-
-input.onGesture(Gesture.TiltLeft, function () {
-    for (let ix = 0; ix < ETtiltLeftHandlers.length; ix++)
-        ETtiltLeftHandlers[ix]()
-    if (ETtiltLeftHandler) ETtiltLeftHandler()
-})
 
 
 //##### START AND STOP BUTTON HANDLING #####//
@@ -207,7 +154,7 @@ radio.onReceivedString(function (msg: string) {
 
     let msgend = false
     let chunk: string
-    let id = msg.substr(0, 2)
+    let idstr = msg.substr(0, 2)
     if (msg.substr(msg.length - 1) == "~") {
         msgend = true
         chunk = msg.substr(2, msg.length - 3)
@@ -216,16 +163,19 @@ radio.onReceivedString(function (msg: string) {
         chunk = msg.substr(2, msg.length - 2)
 
     for (let ix = 0; ix < ETradioIds.length; ix++) {
-        if (id == ETradioIds[ix]) {
+        if (idstr == ETradioIds[ix]) {
             ETradioMsgs[ix] += chunk
             if (msgend) {
-                ETradioHandlers[ix](ETradioMsgs[ix])
+                let id = +idstr
+                if (id > 0 && id < 100) {
+                    if (ETradioHandler) ETradioHandler(ETradioMsgs[ix])
+                }
+                else
+                    ETradioHandlers[ix](ETradioMsgs[ix])
                 ETradioMsgs[ix] = ""
             }
         }
     }
-
-    if (ETradioHandler) ETradioHandler(msg)
 })
 
 radio.setGroup(1)
@@ -433,36 +383,6 @@ enum Movement {
 //% block.loc.nl="Algemeen"
 namespace General {
 
-    export function registerScreenDownHandler(hnd: handler): number {
-        ETscreenDownHandlers.push(hnd)
-        return ETscreenDownHandlers.length - 1
-    }
-
-    export function registerScreenUpHandler(hnd: handler): number {
-        ETscreenUpHandlers.push(hnd)
-        return ETscreenUpHandlers.length - 1
-    }
-
-    export function registerLogoDownHandler(hnd: handler): number {
-        ETlogoDownHandlers.push(hnd)
-        return ETlogoDownHandlers.length - 1
-    }
-
-    export function registerLogoUpHandler(hnd: handler): number {
-        ETlogoUpHandlers.push(hnd)
-        return ETlogoUpHandlers.length - 1
-    }
-
-    export function registerTiltRightHandler(hnd: handler): number {
-        ETtiltRightHandlers.push(hnd)
-        return ETtiltRightHandlers.length - 1
-    }
-
-    export function registerTiltLeftHandler(hnd: handler): number {
-        ETtiltLeftHandlers.push(hnd)
-        return ETtiltLeftHandlers.length - 1
-    }
-
     export function registerStartHandler(hnd: handler): number {
         ETstartHandlers.push(hnd)
         return ETstartHandlers.length - 1
@@ -498,54 +418,6 @@ namespace General {
 
     //% subcategory="Invoer"
     //% color="#FFC000"
-    //% block="when the screen faces down"
-    //% block.loc.nl="wanneer het scherm omlaag wordt gehouden"
-    export function onScreenDown(code: () => void): void {
-        ETscreenDownHandler = code
-    }
-
-    //% subcategory="Invoer"
-    //% color="#FFC000"
-    //% block="when the screen faces up"
-    //% block.loc.nl="wanneer het scherm omhoog wordt gehouden"
-    export function onSreenUp(code: () => void): void {
-        ETscreenUpHandler = code
-    }
-
-    //% subcategory="Invoer"
-    //% color="#FFC000"
-    //% block="when the logo tilts backward"
-    //% block.loc.nl="wanneer het logo naar achter wordt gekanteld"
-    export function onLogoDown(code: () => void): void {
-        ETlogoDownHandler = code
-    }
-
-    //% subcategory="Invoer"
-    //% color="#FFC000"
-    //% block="when the logo tilts forward"
-    //% block.loc.nl="wanneer het logo naar voren wordt gekanteld"
-    export function onLogoUp(code: () => void): void {
-        ETlogoUpHandler = code
-    }
-
-    //% subcategory="Invoer"
-    //% color="#FFC000"
-    //% block="when the logo tilts to the right"
-    //% block.loc.nl="wanneer het logo naar rechts wordt gekanteld"
-    export function onTiltRight(code: () => void): void {
-        ETtiltRightHandler = code
-    }
-
-    //% subcategory="Invoer"
-    //% color="#FFC000"
-    //% block="when the logo tilts to the left"
-    //% block.loc.nl="wanneer het logo naar links wordt gekanteld"
-    export function onTiltLeft(code: () => void): void {
-        ETtiltLeftHandler = code
-    }
-
-    //% subcategory="Invoer"
-    //% color="#FFC000"
     //% block="when the logo is pressed"
     //% block.loc.nl="wanneer op het logo wordt gedrukt"
     export function onPressedLogo(code: () => void): void {
@@ -568,13 +440,47 @@ namespace General {
         ETbuttonAHandler = code
     }
 
-    //% subcategory="Invoer"
+    //% subcategory="Radio"
     //% color="#FFC000"
     //% block="when a message is received in "
     //% block.loc.nl="wanneer een bericht wordt ontvangen in "
     //% draggableParameters="reporter"
     export function onRadioMessage(code: (tekst: string) => void): void {
         ETradioHandler = code
+    }
+
+    //% subcategory="Radio"
+    //% block="send message %text with id %id"
+    //% block.loc.nl="stuur het bericht %text met id %id"
+    function sendRadioMessage(msg: string, id: number) {
+        // messages end with a '~'
+        // messages are sent in chunks
+        // mbit radio buffer size is only 19 bytes
+        //
+        // chunk format:
+        // -------------
+        // char 0..1 :   id
+        // char 2..18 :  msg chunk 
+
+        // ensure that id is a number from 1 up to and including 99
+        while (id >= 99) id -=99
+        id += 1
+        // ensure that id is a two digit number
+        let idstr: string
+        if (id < 10)
+            idstr = "0" + id.toString()
+        else
+            idstr = id.toString()
+
+        let chunk: string
+        do {
+            chunk = msg.substr(0, 17)
+            msg = msg.substr(17)
+            if (chunk.length < 17)
+                chunk += '~'
+            radio.sendString(idstr + chunk)
+            basic.pause(1)
+        } while (msg.length > 0)
     }
 
     //% color="#008800"
