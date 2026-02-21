@@ -156,10 +156,11 @@ radio.onReceivedString(function (msg: string) {
     // -------------
     // char 0..1 :   id
     // char 2..18 :  msg chunk 
-basic.showString(msg)
+
     let msgend = false
     let chunk: string
     let idstr = msg.substr(0, 2)
+    let id = +idstr
     if (msg.substr(msg.length - 1) == "~") {
         msgend = true
         chunk = msg.substr(2, msg.length - 3)
@@ -167,19 +168,21 @@ basic.showString(msg)
     else
         chunk = msg.substr(2, msg.length - 2)
 
-    for (let ix = 0; ix < ETradioIds.length; ix++) {
-        if (idstr == ETradioIds[ix]) {
-            ETradioMsgs[ix] += chunk
-            if (msgend) {
-                let id = +idstr
-                if (id > 0 && id < 100) {
-                    if (ETradioHandler) ETradioHandler(ETradioMsgs[ix])
-                }
-                else
-                    ETradioHandlers[ix](ETradioMsgs[ix])
-                ETradioMsgs[ix] = ""
-            }
-        }
+    let ix: number
+    for (ix = 0; ix < ETradioIds.length; ix++) {
+        if (idstr == ETradioIds[ix]) break
+    }
+    if (ix == ETradioIds.length) {
+        // if the message comes from a program
+        // maybe the id is a new one
+        if (id <= 0 || id >= 100) return
+        General.registerMessageHandler(idstr, ETradioHandler)
+    }
+
+    ETradioMsgs[ix] += chunk
+    if (msgend) {
+        ETradioHandlers[ix](ETradioMsgs[ix])
+        ETradioMsgs[ix] = ""
     }
 })
 
