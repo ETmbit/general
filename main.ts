@@ -119,7 +119,6 @@ function display() {
 
 function displayGroup() {
     basic.showNumber(ETgroup)
-    basic.pause(500)
     display()
     if (ETlogoHandler) ETlogoHandler()
 }
@@ -157,7 +156,7 @@ radio.onReceivedString(function (msg: string) {
     // -------------
     // char 0..1 :   id
     // char 2..18 :  msg chunk 
-
+basic.showString(msg)
     let msgend = false
     let chunk: string
     let idstr = msg.substr(0, 2)
