@@ -106,7 +106,7 @@ let ETradioHandler: strhandler
 const ETeventId = 200 + Math.randomRange(0, 100) // semi-unique id
 let ETgroup = 1
 let ETgroupTimer = 0
-let ETgroupSet = true
+let ETgroupSet = false
 
 function display() {
     if (ETdisplayHandlers.length) {
@@ -137,6 +137,8 @@ input.onLogoEvent(TouchButtonEvent.Pressed, function () {
         if (ETgroup > 9) ETgroup = 1
         radio.setGroup(ETgroup)
     }
+    else
+        ETgroupSet = true
     basic.showNumber(ETgroup)
     if (!ETgroupTimer) {
         ETgroupTimer = control.millis() + 1000
