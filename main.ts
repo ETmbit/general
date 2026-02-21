@@ -460,6 +460,7 @@ namespace General {
     //% subcategory="Radio"
     //% block="send message %text with id %id"
     //% block.loc.nl="stuur het bericht %text met id %id"
+    //% id.min=1 id.max=99 id.defl=1
     export function sendRadioMessage(msg: string, id: number) {
         // messages end with a '~'
         // messages are sent in chunks
@@ -471,8 +472,8 @@ namespace General {
         // char 2..18 :  msg chunk 
 
         // ensure that id is a number from 1 up to and including 99
-        while (id >= 99) id -=99
-        id += 1
+        if (id <= 0 || id >= 100) return
+
         // ensure that id is a two digit number
         let idstr: string
         if (id < 10)
