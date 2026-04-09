@@ -181,7 +181,7 @@ radio.onReceivedString(function (msg: string) {
 
     ETradioMsgs[ix] += chunk
     if (msgend) {
-        if (ETradioHandlers[ix]) ETradioHandlers[ix](ETradioMsgs[ix])
+        ETradioHandlers[ix](ETradioMsgs[ix])
         ETradioMsgs[ix] = ""
     }
 })
